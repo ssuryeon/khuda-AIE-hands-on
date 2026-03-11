@@ -40,33 +40,73 @@
 
 ### GET /health
 
+**Endpoint**
+`GET /health`
+
+**Description**
 서버가 정상 실행 중인지 확인하는 엔드포인트입니다. 모든 주차에서 유지됩니다.
 
 > **엔드포인트란?** 특정 기능을 수행하는 서버의 주소(URL)입니다. `/health` 는 "서버 상태 확인"이라는 기능에 붙인 주소입니다.
 
-| 구분 | 내용 |
-|------|------|
-| **메서드** | `GET` |
-| **요청 바디** | 없음 |
-| **응답 200** | `{ "status": "ok" }` |
+**Path Parameters**
+없음
+
+**Query Parameters**
+없음
+
+**Request Body**
+없음
+
+**Example Request**
+```http
+GET /health HTTP/1.1
+Host: localhost:8000
+```
+
+**Example Response (200)**
+```json
+{
+  "status": "ok"
+}
+```
 
 ---
 
 ### POST /summarize (1주차: 에코)
 
+**Endpoint**
+`POST /summarize`
+
+**Description**
 요청으로 받은 JSON을 그대로 되돌려 줍니다. LLM·DB 미사용. 스키마 검증 없음(임의 JSON 허용).
 
 > **에코(echo)란?** 보낸 내용을 그대로 돌려 주는 것입니다. 지금은 AI 로직이 없고, "요청이 서버에 들어오고 응답이 나간다"는 흐름 자체를 확인하는 단계입니다.
 
-**요청**
+**Path Parameters**
+없음
 
-| 구분 | 내용 |
-|------|------|
-| **메서드** | `POST` |
-| **요청 바디** | 임의 JSON (예: `{ "title": "...", "content": "..." }`) |
+**Query Parameters**
+없음
 
-**응답 200**
+**Request Body (application/json)**
 
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| (임의) | object | - | 임의 JSON | `{ "title": "...", "content": "..." }` |
+
+**Example Request**
+```http
+POST /summarize HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+
+{
+  "title": "...",
+  "content": "..."
+}
+```
+
+**Example Response (200)**
 ```json
 {
   "received": { "title": "...", "content": "..." },
@@ -80,37 +120,41 @@
 
 ### POST /summarize (2주차: 스키마 적용)
 
+**Endpoint**
+`POST /summarize`
+
+**Description**
 Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는 요청은 로직 실행 전에 422로 차단됩니다.
 
 > **스키마(Schema)란?** "이 요청에는 어떤 필드가 있어야 하고, 각각 어떤 타입이어야 한다"는 규칙입니다. 계약서라고 생각하시면 됩니다.
 
-#### Request: SummaryRequest
+**Path Parameters**
+없음
 
-서버가 수락하는 요청 데이터 규칙입니다.
+**Query Parameters**
+없음
 
-| 필드 | 타입 | 필수 | 설명 |
-|------|------|:----:|------|
-| `content_text` | string | O | 요약 대상 테크 블로그 전문 |
-| `title` | string \| null | - | 글 제목 (없으면 null) |
-| `output_format` | `"json"` | O | 출력 형식. 현재 `"json"` 만 허용 |
+**Request Body (application/json)**
 
-#### Response: SummaryResponse
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `content_text` | string | O | 요약 대상 테크 블로그 전문 | `"FastAPI는 Python의 타입 힌트를 활용해..."` |
+| `title` | string \| null | - | 글 제목 (없으면 null) | `"FastAPI 완벽 가이드"` |
+| `output_format` | `"json"` | O | 출력 형식. 현재 `"json"` 만 허용 | `"json"` |
 
-서버가 돌려 주는 응답 데이터 규칙입니다.
+**Response (200) — 필드 정의**
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `main_points` | string[] | 핵심 포인트 목록 |
-| `core_summary` | string | 한 단락 핵심 요약 |
-| `structure_summary` | string | 글 구조 설명 |
-| `practical_insights` | string[] | 실무 인사이트 목록 |
-| `meta.prompt_version` | string | 어떤 버전의 프롬프트로 생성했는지 |
-| `meta.generated_at` | string | 생성 시각 (ISO 8601 형식. 예: `2024-01-15T10:30:00Z`) |
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `main_points` | string[] | - | 핵심 포인트 목록 | `["...", "..."]` |
+| `core_summary` | string | - | 한 단락 핵심 요약 | `"..."` |
+| `structure_summary` | string | - | 글 구조 설명 | `"..."` |
+| `practical_insights` | string[] | - | 실무 인사이트 목록 | `["..."]` |
+| `meta.prompt_version` | string | - | 어떤 버전의 프롬프트로 생성했는지 | `"v1.0"` |
+| `meta.generated_at` | string | - | 생성 시각 (ISO 8601 형식) | `"2024-01-15T10:30:00Z"` |
 
-**요청 예시 → 응답 200**
-
+**Example Request**
 ```json
-// 요청 바디
 {
   "content_text": "FastAPI는 Python의 타입 힌트를 활용해...",
   "title": "FastAPI 완벽 가이드",
@@ -118,8 +162,8 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 }
 ```
 
+**Example Response (200)**
 ```json
-// 응답
 {
   "main_points": ["...", "..."],
   "core_summary": "...",
@@ -132,8 +176,7 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 }
 ```
 
-**잘못된 요청 → 응답 422**
-
+**Example Response (422)**
 `content_text` 누락 또는 `output_format` 허용값 위반 시 422가 자동 반환됩니다.
 
 ```json
@@ -147,30 +190,93 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 
 ### POST /summarize (3주차: DB 저장)
 
+**Endpoint**
+`POST /summarize`
+
+**Description**
 2주차 Request·Response 스키마와 동일합니다. 요약 생성 후 DB에 저장하며, 응답에 `id` 가 추가됩니다.
 
 > **`id`란?** DB에 저장된 각 레코드를 구분하는 고유 번호입니다. 나중에 이 번호로 특정 요약을 다시 꺼낼 수 있습니다.
 
-**응답 200 (변경 필드)**
+**Path Parameters**
+없음
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `id` | integer | 저장된 요약의 고유 번호 (신규 추가) |
-| (나머지) | — | SummaryResponse와 동일 |
+**Query Parameters**
+없음
+
+**Request Body (application/json)**
+
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `content_text` | string | O | 요약 대상 테크 블로그 전문 | `"FastAPI는 Python의 타입 힌트를 활용해..."` |
+| `title` | string \| null | - | 글 제목 (없으면 null) | `"FastAPI 완벽 가이드"` |
+| `output_format` | `"json"` | O | 출력 형식. 현재 `"json"` 만 허용 | `"json"` |
+
+**Response (200) — 필드 정의**
+
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `id` | integer | - | 저장된 요약의 고유 번호 (신규 추가) | `1` |
+| (나머지) | — | — | SummaryResponse와 동일 | — |
+
+**Example Request**
+```json
+{
+  "content_text": "FastAPI는 Python의 타입 힌트를 활용해...",
+  "title": "FastAPI 완벽 가이드",
+  "output_format": "json"
+}
+```
+
+**Example Response (200)**
+```json
+{
+  "id": 1,
+  "main_points": ["...", "..."],
+  "core_summary": "...",
+  "structure_summary": "...",
+  "practical_insights": ["..."],
+  "meta": {
+    "prompt_version": "v1.0",
+    "generated_at": "2024-01-15T10:30:00Z"
+  }
+}
+```
 
 ---
 
 ### GET /summaries
 
+**Endpoint**
+`GET /summaries`
+
+**Description**
 저장된 요약 전체 목록을 최신순으로 조회합니다.
 
-| 구분 | 내용 |
-|------|------|
-| **메서드** | `GET` |
-| **요청 바디** | 없음 |
+**Path Parameters**
+없음
 
-**응답 200**
+**Query Parameters**
+없음
 
+**Request Body**
+없음
+
+**Response (200) — 필드 정의 (배열 요소)**
+
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `id` | integer | - | 요약 고유 번호 | `1` |
+| `title` | string \| null | - | 글 제목 (없으면 null) | `"FastAPI 완벽 가이드"` |
+| `created_at` | string | - | 저장된 시각 | `"2024-01-15T10:30:00Z"` |
+
+**Example Request**
+```http
+GET /summaries HTTP/1.1
+Host: localhost:8000
+```
+
+**Example Response (200)**
 ```json
 [
   { "id": 1, "title": "FastAPI 완벽 가이드", "created_at": "2024-01-15T10:30:00Z" },
@@ -178,28 +284,51 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 ]
 ```
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `id` | integer | 요약 고유 번호 |
-| `title` | string \| null | 글 제목 (없으면 null) |
-| `created_at` | string | 저장된 시각 |
-
 ---
 
 ### GET /summaries/{id}
 
+**Endpoint**
+`GET /summaries/{id}`
+
+**Description**
 요약 한 건을 조회합니다. `{id}` 자리에 조회할 요약 번호를 넣으면 됩니다.
 
 > 예: `GET /summaries/1` → id가 1인 요약을 조회합니다.
 
-| 구분 | 내용 |
-|------|------|
-| **메서드** | `GET` |
-| **Path 파라미터** | `id` — 조회할 요약의 고유 번호 |
-| **요청 바디** | 없음 |
+**Path Parameters**
 
-**응답 200**
+| Name | Type | Required | Description | Example |
+|------|------|:--------:|-------------|---------|
+| `id` | integer | yes | 조회할 요약의 고유 번호 | `1` |
 
+**Query Parameters**
+없음
+
+**Request Body**
+없음
+
+**Response (200) — 필드 정의**
+
+| Field | Type | Required | Description | Example |
+|-------|------|:--------:|-------------|---------|
+| `id` | integer | - | 요약 고유 번호 | `1` |
+| `title` | string \| null | - | 글 제목 | `"FastAPI 완벽 가이드"` |
+| `content_text` | string | - | 요약 대상 원문 | `"FastAPI는..."` |
+| `main_points` | array | - | 핵심 포인트 목록 | `[...]` |
+| `core_summary` | string | - | 한 단락 핵심 요약 | `"..."` |
+| `structure_summary` | string | - | 글 구조 설명 | `"..."` |
+| `practical_insights` | array | - | 실무 인사이트 목록 | `[...]` |
+| `meta` | object | - | prompt_version, generated_at 등 | `{ "prompt_version": "v1.0", "generated_at": "..." }` |
+| `created_at` | string | - | 저장된 시각 | `"2024-01-15T10:30:00Z"` |
+
+**Example Request**
+```http
+GET /summaries/1 HTTP/1.1
+Host: localhost:8000
+```
+
+**Example Response (200)**
 ```json
 {
   "id": 1,
@@ -217,7 +346,8 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 }
 ```
 
-**응답 404** — 해당 `id` 없음
+**Example Response (404)**
+해당 `id` 없음
 
 ```json
 { "detail": "Summary not found" }
@@ -235,6 +365,11 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 | DB 접근 위치 | 라우터 함수 안 | Repository 클래스 |
 | 저장 조건 | LLM 결과 그대로 저장 | Response 스키마 검증 통과분만 저장 |
 
+**API 목록 (구조는 3주차와 동일)**
+
+- **Endpoint** · **Description** · **Path Parameters** · **Query Parameters** · **Request Body** · **Example Request** · **Example Response** 형식으로 3주차 명세를 따릅니다.
+- `GET /health` · `POST /summarize` · `GET /summaries` · `GET /summaries/{id}`
+
 ---
 
 ## 5주차
@@ -250,3 +385,8 @@ Request·Response 스키마를 적용합니다. 스키마를 만족하지 않는
 | DB 접근 | 동기 세션 | `await session.execute(...)` (aiosqlite) |
 
 여러 요청이 동시에 들어와도, 하나의 LLM 대기 중에 다른 요청이 블로킹되지 않도록 구성합니다.
+
+**API 목록 (구조는 4주차·3주차와 동일)**
+
+- **Endpoint** · **Description** · **Path Parameters** · **Query Parameters** · **Request Body** · **Example Request** · **Example Response** 형식으로 3주차 명세를 따릅니다.
+- `GET /health` · `POST /summarize` · `GET /summaries` · `GET /summaries/{id}`

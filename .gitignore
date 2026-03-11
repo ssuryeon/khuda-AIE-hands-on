@@ -52,5 +52,3 @@ alembic/versions/__pycache__/
 *.bak
 *.tmp
 
-# 관리자용 완성 코드
-app/main_solution.py
