@@ -35,7 +35,11 @@ from fastapi import FastAPI
 #   description = "테크 블로그 요약 서버 - 5주 커리큘럼"
 #   version     = "0.1.0"
 # --------------------------------------------------------
-app = ...
+app = FastAPI(
+    title='AIE_hands-on',
+    description='테크 블로그 요약 서버 - 5주 커리큘럼',
+    version="0.1.0"
+)
 
 
 # TODO [2] -----------------------------------------------
@@ -53,7 +57,7 @@ app = ...
 # --------------------------------------------------------
 @app.get("/health")
 def health():
-    pass  # TODO: 구현하세요
+    return {"status": "ok"}  # TODO: 구현하세요
 
 
 # TODO [3] -----------------------------------------------
@@ -78,4 +82,7 @@ def health():
 # --------------------------------------------------------
 @app.post("/summarize", status_code=200)
 def summarize(body: dict):
-    pass  # TODO: 구현하세요
+    return {
+        "received": body,
+        "message": "echo ok"
+    }  # TODO: 구현하세요
