@@ -37,7 +37,7 @@ uvicorn app.main:app --reload
 | --- | ------------------------------ | ----- |
 | 1주차 | HTTP 요청/응답 구조 확인 (에코 서버)       | ✅ 구현  |
 | 2주차 | Pydantic 스키마로 입력/출력 계약 고정      | ✅ 구현  |
-| 3주차 | DB 저장/조회 (SQLite + SQLAlchemy) | 🔜 예정 |
+| 3주차 | DB 저장/조회 (SQLite + SQLAlchemy) | ✅ 구현 |
 | 4주차 | 레이어드 아키텍처 + LangChain 연동       | 🔜 예정 |
 | 5주차 | async 처리로 동시 요청 대응             | 🔜 예정 |
 
@@ -62,7 +62,11 @@ uvicorn app.main:app --reload
 ```
 AIE/
 ├── app/
-│   └── main.py          
+│   ├── main.py          # 실습용 (TODO [1]~[5])
+│   ├── main_solution.py # 정답용
+│   ├── models.py        # ORM
+│   ├── schemas.py       # Pydantic 스키마
+│   └── database.py      # SQLite 연결
 ├── docs/
 │   ├── setup.md
 │   ├── roadmap.md
@@ -73,7 +77,8 @@ AIE/
 │   ├── week2.sh
 │   ├── week3.sh
 │   ├── week4.sh
-│   └── week5.sh
+│   ├── week5.sh
+│   └── benchmark_index.py   # 인덱스 실습 (docs/db-schema.md 참고)
 ├── requirements.txt
 └── README.md
 ```

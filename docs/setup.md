@@ -95,6 +95,35 @@ upstream  https://github.com/강사-아이디/레포지토리이름.git (push)
 git pull upstream main
 ```
 
+#### 로컬에서 코드를 수정했을 때
+
+공부하면서 코드를 건드려 두었다가 `git pull upstream main`을 실행하면 충돌이 나거나 pull이 안 될 수 있습니다. **main 브랜치에서 수정했는지**, **새 브랜치를 만들어서 작업했는지**에 따라 다르게 하시면 됩니다.
+
+**main 브랜치에서 코드를 건드렸을 때**
+
+수정한 내용을 버려도 되고, 트랙장과 똑같은 상태로 맞추고 싶다면 아래 두 줄만 실행하세요.
+
+```bash
+git fetch upstream
+git reset --hard upstream/main
+```
+
+**왜 이렇게 하냐면,** `git fetch upstream`은 upstream의 최신 내용만 가져오고 로컬 파일은 건드리지 않습니다. 그다음 `git reset --hard upstream/main`으로 로컬 `main`을 upstream과 똑같이 덮어씁니다. 로컬에서 수정·커밋한 내용은 모두 사라지므로, 정말 버려도 될 때만 사용하세요.
+
+**새 브랜치를 만들어서 작업했을 때**
+
+공부용으로 `git checkout -b 새로 만든 브랜치명` 처럼 브랜치를 만들어 두고 거기서만 수정했다면, 실습하려면 먼저 **main으로 돌아온 뒤** 트랙장의 최신 코드를 받으면 됩니다.
+
+```bash
+git checkout main
+git pull upstream main
+```
+
+이렇게 하면 브랜치에 둔 공부 내용은 그대로 있고, main만 트랙장과 맞춰집니다.
+
+**앞으로의 습관**  
+공부용으로 코드를 바꿀 때는 `git checkout -b 새로 만든 브랜치명` 처럼 브랜치를 만들어서 작업해 두면, `main`은 항상 트랙장과 맞춰 두기 좋습니다. 실습할 때만 `main`으로 돌아와서 `git pull upstream main` 하시면 됩니다.
+
 ---
 
 ### 0-5. 세팅 완료 확인
@@ -135,6 +164,29 @@ jq --version
 ```
 
 `jq-1.x` 형태로 버전이 출력되면 됩니다.
+
+### sqlite3
+
+3주차부터 SQLite DB(`summary.db`)를 사용합니다. `scripts/week3.sh`의 DB 조회 단계나 [DB 스키마](db-schema.md#db-초기화) 문서의 초기화 명령은 **sqlite3** CLI로 실행합니다. 미리 설치해 두세요.
+
+```bash
+# Ubuntu / Debian (WSL 포함)
+sudo apt install sqlite3
+
+# macOS
+brew install sqlite3
+
+# Windows
+# https://www.sqlite.org/download.html 에서 Precompiled Binaries 다운로드 후 PATH에 추가
+```
+
+설치 확인:
+
+```bash
+sqlite3 --version
+```
+
+버전 번호가 출력되면 됩니다.
 
 ---
 
