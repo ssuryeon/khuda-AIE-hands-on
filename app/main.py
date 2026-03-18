@@ -63,13 +63,38 @@ def _build_dummy_response() -> schemas.SummaryResponse:
 def summarize(body: schemas.SummaryRequest, db: Session = Depends(get_db)) -> schemas.SummaryResponseWithId:
     # TODO [3] response 생성 → Summary 행 만들어 db.add/commit/refresh → SummaryResponseWithId(id=row.id, ...) 반환
     response = _build_dummy_response()
-    raise NotImplementedError("TODO [3]")
+    output_json = json.dumps(response.model_dump())
+    row = models.Summary(
+        title=body.title,
+        content_text=body.content_text,
+        output_json=output_json,
+        prompt_version=response.meta.prompt_version,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return schemas.SummaryResponseWithId(
+        id=row.id,
+        **response.model_dump(),
+    )
 
 
 @app.get("/summaries", response_model=list[schemas.SummaryListItem])
 def list_summaries(db: Session = Depends(get_db)) -> list[schemas.SummaryListItem]:
     # TODO [4] 전체 조회 후 최신순 정렬, SummaryListItem 리스트로 반환 (created_at은 _created_at_to_iso 사용)
-    raise NotImplementedError("TODO [4]")
+    rows = (
+        db.query(models.Summary)
+        .order_by(models.Summary.created_at.desc())
+        .all()
+    )
+    return [
+        schemas.SummaryListItem(
+            id=r.id,
+            title=r.title,
+            created_at=_created_at_to_iso(r.created_at),
+        )
+        for r in rows
+    ]
 
 
 @app.get("/summaries/{id}", response_model=schemas.SummaryDetail)
@@ -78,4 +103,15 @@ def get_summary(id: int, db: Session = Depends(get_db)) -> schemas.SummaryDetail
     row = db.query(models.Summary).filter(models.Summary.id == id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Summary not found")
-    raise NotImplementedError("TODO [5]")
+    data = json.loads(row.output_json)
+    return schemas.SummaryDetail(
+        id=row.id,
+        title=row.title,
+        content_text=row.content_text,
+        main_points=data["main_points"],
+        core_summary=data["core_summary"],
+        structure_summary=data["structure_summary"],
+        practical_insights=data["practical_insights"],
+        meta=schemas.SummaryMeta(**data["meta"]),
+        created_at=_created_at_to_iso(row.created_at),
+    )
