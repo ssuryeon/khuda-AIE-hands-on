@@ -33,12 +33,10 @@ app = FastAPI(
 #   title         : str | None      — 선택 (기본값 None)
 #   output_format : Literal["json"] — 필수, "json" 이외 값은 422
 # --------------------------------------------------------
-app = FastAPI(
-    title='AIE_hands-on',
-    description='테크 블로그 요약 서버 - 5주 커리큘럼',
-    version="0.1.0"
-)
-
+class SummaryRequest(BaseModel):
+    contest_text: str
+    title: str | None = None
+    output_format: Literal["json"]
 
 # TODO [2] -----------------------------------------------
 # SummaryMeta 모델을 정의하세요.
@@ -47,7 +45,9 @@ app = FastAPI(
 #   prompt_version : str — 예: "v1.0"
 #   generated_at   : str — ISO 8601, 예: "2024-01-15T10:30:00Z"
 # --------------------------------------------------------
-
+class SummaryMeta(BaseModel):
+    prompt_version: str
+    generated_at: str
 
 # TODO [3] -----------------------------------------------
 # SummaryResponse 모델을 정의하세요.
@@ -59,12 +59,12 @@ app = FastAPI(
 #   practical_insights : list[str]
 #   meta               : SummaryMeta
 # --------------------------------------------------------
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}  # TODO: 구현하세요
-    return {"status": "ok"}
+class SummaryResponse(BaseModel):
+    main_points        : list[str]
+    core_summary       : str
+    structure_summary  : str
+    practical_insights : list[str]
+    meta               : SummaryMeta
 
 
 # TODO [4] -----------------------------------------------
@@ -80,4 +80,20 @@ def health():
 # --------------------------------------------------------
 @app.post("/summarize", response_model=SummaryResponse)
 def summarize(body: SummaryRequest) -> SummaryResponse:
-    raise NotImplementedError
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return SummaryResponse(
+        main_points=[
+            "2주차: 입력 스키마(SummaryRequest)가 적용되었습니다",
+            "2주차: 출력 스키마(SummaryResponse)가 적용되었습니다",
+        ],
+        core_summary="Pydantic 스키마로 API 계약이 고정되었습니다. 규격 외 입력은 422로 차단됩니다.",
+        structure_summary="요청 → 스키마 검증 → 더미 응답 반환 (3주차에서 실제 LLM 호출로 교체됩니다)",
+        practical_insights=[
+            "content_text 필드가 없으면 FastAPI가 자동으로 422를 반환합니다",
+            "output_format은 'json'만 허용합니다. 다른 값은 422로 차단됩니다",
+        ],
+        meta=SummaryMeta(
+            prompt_version="v1.0",
+            generated_at=now,
+        ),
+    )
